@@ -65,27 +65,26 @@ const char* operandToString(OperandType t) {
 }
 
 void print_instr(Instruction i) {
-    printf("%s(0x%x)", opcodes[i.opcode].mnemonic, i.raw);
+    printf("%s", opcodes[i.opcode].mnemonic);
 
     for (auto opr : i.operands) {
-        printf("\n%s", operandToString(opr.type));
-        printf("(len = %d, off = %d, data = %d)", opr.length, opr.offset, opr.data);
-//        switch(opr.type) {
-//            case OperandType::cond:
-//                printf("(%s)", condToString((ConditionCode)opr.data));
-//            case None:
-//                break;
-//            case Imm:
-//                break;
-//            case Rn:
-//                break;
-//            case Rd:
-//                break;
-//            case Rt2:
-//                break;
-//            case Rt:
-//                break;
-//        }
+        //printf("\n%s", operandToString(opr.type));
+        //printf("(len = %d, off = %d, data = %d)", opr.length, opr.offset, opr.data);
+        switch(opr.type) {
+            case OperandType::cond:
+                printf(".%s", condToString((ConditionCode)opr.data));
+            case None:
+                break;
+            case Imm:
+                printf(" #%u", opr.data);
+                break;
+            case Rn:
+            case Rd:
+            case Rt2:
+            case Rt:
+                printf(" x%u", opr.data);
+                break;
+        }
     }
 
     printf("\n");

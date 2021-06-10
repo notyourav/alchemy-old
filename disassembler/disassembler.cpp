@@ -46,8 +46,8 @@ static void decode_operands(Instruction& i) {
             }
         } else {
             if (type != OperandType::None) {
-                uint32_t data = extract_bits(i.raw, 31 - bit, len);
-                i.operands.emplace_back(31 - bit, len, data, type);
+                uint32_t data = extract_bits(i.raw, 32 - bit, len);
+                i.operands.emplace_back(32 - bit, len, data, type);
                 len = 0;
                 type = OperandType::None;
             }
@@ -89,8 +89,8 @@ static void decode_operands(Instruction& i) {
     }
 
     if (type != OperandType::None) {
-        uint32_t data = extract_bits(i.raw, 31 - bit, len);
-        i.operands.emplace_back(31 - bit, len, data, type);
+        uint32_t data = extract_bits(i.raw, 32 - bit, len);
+        i.operands.emplace_back(32 - bit, len, data, type);
     }
 }
 
