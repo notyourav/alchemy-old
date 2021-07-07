@@ -1,25 +1,47 @@
-#ifndef ALCHEMY_INSTRUCTION_H
-#define ALCHEMY_INSTRUCTION_H
+#pragma once
 
 #include <cstdint>
+#include <map>
 #include <vector>
 #include "op_table.h"
 
-enum OperandType {
-    None,
-    Imm,
-    Rn,
-    Rd,
-    Rt2,
-    Rt,
-    cond
-};
-
 enum Register {
-    x29 = 2,
-    sp = 4,
+    r0 = 0,
+    r1,
+    r2,
+    r3,
+    r4,
+    r5,
+    r6,
+    r7,
+    r8,
+    r9,
+    r10,
+    r11,
+    r12,
+    r13,
+    r14,
+    r15,
+    r16,
+    r17,
+    r18,
+    r19,
+    r20,
+    r21,
+    r22,
+    r23,
+    r24,
+    r25,
+    r26,
+    r27,
+    r28,
+    r29_fr,
+    r30_lr,
+    sp_zr
 };
+extern std::map<Register, const char*> register_name;
 
+enum OperandType { None, Imm, Rn, Rd, Rt2, Rt, cond };
 enum ConditionCode {
     EQ = 0,
     NE = 1,
@@ -36,8 +58,12 @@ enum ConditionCode {
     GT = 12,
     LE = 13,
     AL = 14,
-    NV = 15,
+    NV = 15
 };
+
+extern std::map<Register, const char*> register_name;
+extern std::map<ConditionCode, const char*> condition_code_name;
+extern std::map<OperandType, const char*> operand_type_name;
 
 struct Operand {
     Operand(uint32_t offset, uint32_t length, uint32_t data, OperandType type) {
@@ -65,5 +91,3 @@ void print_instr(Instruction i);
 void generate_masks();
 
 const char* operandToString(OperandType t);
-
-#endif //ALCHEMY_INSTRUCTION_H

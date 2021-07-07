@@ -1,42 +1,27 @@
-#include <cassert>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include "disassembler.h"
-#include "arm/instruction.h"
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include "disassembler/program.h"
 #include "ut.h"
 
-static void disassemble(void);
-static void dump_text(const char* path);
-static Instruction decode_instr(const void* loc);
 static uint32_t swap_endian(uint32_t instr);
 static void text_get_info(const char* path);
 
 static long text_offset = 0;
-static long text_size = 0;
-static void* text_bindump = NULL;
-static Instruction* instructions = NULL;
+static size_t text_size = 0;
 
 #define INSTR_LENGTH 4
 
-void disassembler_init(const char* path) {
-    generate_masks();
-    text_get_info(path);
-    printf("Text section offset: 0x%lx\n", text_offset);
-    printf("Text section size: 0x%lx\n", text_size);
-
-    dump_text(path);
-    disassemble();
-}
-
 static void decode_operands(Instruction& i) {
     const char* enc = opcodes[i.opcode].encoding;
-    int p = 0; // string offset
-    int bit = 0; // opcode offset
-    int len = 0; // current operand length
-    OperandType type = OperandType::None; // last evaluated operand
+    int p = 0;                             // string offset
+    int bit = 0;                           // opcode offset
+    int len = 0;                           // current operand length
+    OperandType type = OperandType::None;  // last evaluated operand
 
-    while(enc[p] != '\0') {
+    while (enc[p] != '\0') {
         if (enc[p] == ':') {
             // separator
             p++;
@@ -57,28 +42,21 @@ static void decode_operands(Instruction& i) {
                 p++;
                 bit++;
             } else {
-                if (strncmp(&enc[p], "imm", 3) == 0) {
-                    // of the form imm##
-                    char* end;
-                    strtol(&enc[p + 3], &end, 10);
-                    p += (intptr_t)end - (intptr_t)&enc[p];
-                    type = OperandType::Imm;
-                } else if (strncmp(&enc[p], "Rd", 2) == 0) {
-                    type = OperandType::Rd;
-                    p += 2;
-                } else if (strncmp(&enc[p], "Rn", 2) == 0) {
-                    type = OperandType::Rn;
-                    p += 2;
-                } else if (strncmp(&enc[p], "Rt2", 3) == 0) {
-                    type = OperandType::Rt2;
-                    p += 3;
-                } else if (strncmp(&enc[p], "Rt", 2) == 0) {
-                    type = OperandType::Rt;
-                    p += 2;
-                } else if (strncmp(&enc[p], "cond", 4) == 0) {
-                    type = OperandType::cond;
-                    p += 4;
-                } else {
+                for (auto it = operand_type_name.begin(); it != operand_type_name.end(); ++it) {
+                    if (strncmp(it->second, &enc[p], strlen(it->second)) == 0) {
+                        type = it->first;
+                        p += strlen(it->second);
+
+                        // immediate is followed by its size
+                        if (type == OperandType::Imm) {
+                            char* end;
+                            strtol(&enc[p], &end, 10);
+                            p += (intptr_t)end - (intptr_t)&enc[p];
+                        }
+                        break;
+                    }
+                }
+                if (type == OperandType::None) {
                     char buf[64];
                     strcpy(buf, &enc[p]);
                     printf("unhandled operand: %s\n", strtok(buf, ":"));
@@ -87,22 +65,21 @@ static void decode_operands(Instruction& i) {
             }
         }
     }
-
+    // capture last operand (fix this?)
     if (type != OperandType::None) {
         uint32_t data = extract_bits(i.raw, 32 - bit, len);
         i.operands.emplace_back(32 - bit, len, data, type);
     }
 }
 
-static Instruction decode_instr(const void* loc) {
-    uint32_t raw = *(uint32_t*) loc;
+static Instruction decode_instr(uint32_t instr) {
     Instruction i = {.opcode = bad};
 
     for (int a = 0; a < 1115; ++a) {
         uint32_t h = opcodes[a].hex;
-        if ((raw & op_masks[a]) == h) {
+        if ((instr & op_masks[a]) == h) {
             i.opcode = (Opcode)a;
-            i.raw = raw;
+            i.raw = instr;
             decode_operands(i);
             print_instr(i);
             break;
@@ -112,53 +89,42 @@ static Instruction decode_instr(const void* loc) {
     return i;
 }
 
-static void disassemble(void) {
-    unsigned long dis_size = 0x100 * sizeof(Instruction);
-    void* pos = text_bindump;
-    intptr_t end = (intptr_t)text_bindump + text_size;
-    unsigned long instr_count = 0;
-    instructions = (Instruction*) malloc(dis_size);
+// TODO: support variable length instructions.
+const Program& Disassembler::init(std::span<uint32_t> data) {
+    for (auto& i : data) {
+        Instruction instr = decode_instr(i);
 
-    while ((intptr_t)pos < end) {
-        Instruction i = decode_instr(pos);
-
-        // discard if instruction was decoded past end of section
-        if ((intptr_t)pos + INSTR_LENGTH - 1 >= end) {
-            printf("instruction error at %lx\n", text_offset + (intptr_t)pos - (intptr_t)text_bindump);
-            break;
+        if (instr.opcode == bad) {
+            // printf("bad opcode: %08x\n", i);
+            // break;
         }
 
-        instr_count++;
-
-        // mem check
-        if (instr_count * sizeof(Instruction) > dis_size) {
-            dis_size *= 2;
-            instructions = (Instruction*) realloc(instructions, dis_size);
-        }
-
-        instructions[instr_count - 1] = i;
-        pos = (void*) ((intptr_t) pos + INSTR_LENGTH);
+        mProgram.instructions.emplace_back(instr);
     }
 
-    printf("Done disassemble. instr_count %ld\n", instr_count);
+    printf("Done disassemble. instr_count %ld\n", mProgram.instructions.size());
+    return mProgram;
 }
 
-/*
- * Dump code into memory
- */
-static void dump_text(const char* path) {
+const Program& Disassembler::init(const char* path) {
+    text_get_info(path);
+    printf("Text section offset: 0x%lx\n", text_offset);
+    printf("Text section size: 0x%lx\n", text_size);
+
     FILE* f = fopen(path, "r");
-    text_bindump = malloc(text_size);
+    uint32_t* dump = (uint32_t*)malloc(text_size);
     fseek(f, text_offset, SEEK_SET);
-    fread(text_bindump, text_size, 1, f);
+    fread(dump, text_size, 1, f);
     fclose(f);
+
+    init({dump, text_size});
+    free(dump);
+    return mProgram;
 }
 
 static uint32_t __attribute__((unused)) swap_endian(uint32_t instr) {
     uint32_t result = 0;
-    result = ((instr >> 24) & 0xFF) |
-             ((instr << 8) & 0xFF0000) |
-             ((instr >> 8) & 0xFF00) |
+    result = ((instr >> 24) & 0xFF) | ((instr << 8) & 0xFF0000) | ((instr >> 8) & 0xFF00) |
              ((instr << 24) & 0xFF000000);
     return result;
 }

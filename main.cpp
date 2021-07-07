@@ -1,5 +1,5 @@
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 #include "disassembler/disassembler.h"
 
@@ -15,39 +15,40 @@ long filesize(FILE* f) {
 }
 
 int main(int argc, char* argv[]) {
-    char*   path = NULL;
-    int     opt;
+    char* path = NULL;
+    int opt;
+    Disassembler* dis = new Disassembler();
 
     while ((opt = getopt(argc, argv, "i:")) != -1) {
         switch (opt) {
-            case 'i':
-                path = optarg;
-                break;
+        case 'i':
+            path = optarg;
+            break;
         }
     }
 
     // input path was supplied
     if (path != NULL) {
-        disassembler_init(path);
+        dis->init(path);
 
-//        FILE*   file    = NULL;
-//        char*   content = NULL;
-//        long    size;
-//
-//        file = fopen(path, "r");
-//        if (file == NULL) {
-//            fprintf(stderr, "Input file could not be opened.\n");
-//            return EXIT_FAILURE;
-//        }
-//
-//        size = filesize(file);
-//        content = malloc(size);
-//        fread(content, size, 1, file);
-//        printf("filesize %ld kb\n", size / 1024);
-//        fclose(file);
-//
-//        init_disasm(content);
-//        free(content);
+        //        FILE*   file    = NULL;
+        //        char*   content = NULL;
+        //        long    size;
+        //
+        //        file = fopen(path, "r");
+        //        if (file == NULL) {
+        //            fprintf(stderr, "Input file could not be opened.\n");
+        //            return EXIT_FAILURE;
+        //        }
+        //
+        //        size = filesize(file);
+        //        content = malloc(size);
+        //        fread(content, size, 1, file);
+        //        printf("filesize %ld kb\n", size / 1024);
+        //        fclose(file);
+        //
+        //        init_disasm(content);
+        //        free(content);
     }
 
     return 0;
