@@ -1,0 +1,3 @@
+
+for IR code: clang -S -g -emit-llvm for_loops.c
+for binary: clang for_loops.c -o for_loops -arch aarch64

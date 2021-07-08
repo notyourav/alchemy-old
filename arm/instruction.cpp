@@ -14,13 +14,14 @@ std::map<Register, const char*> register_name = {
     {r24, "r24"},    {r25, "r25"}, {r26, "r26"}, {r27, "r27"}, {r28, "r28"}, {r29_fr, "r29"},
     {r30_lr, "r30"}, {sp_zr, "sp"}};
 std::map<OperandType, const char*> operand_type_name = {
-    {None, "None"}, {Imm, "imm"}, {Rn, "Rn"}, {Rd, "Rd"}, {Rt2, "Rt2"}, {Rt, "Rt"}, {cond, "cond"}};
+    {None, "None"}, {Imm, "imm"}, {Rn, "Rn"}, {Rd, "Rd"},    {Rt2, "Rt2"},
+    {Rt, "Rt"},     {Rs, "Rs"},   {Rm, "Rm"}, {cond, "cond"}};
 std::map<ConditionCode, const char*> condition_code_name = {
     {EQ, "eq"}, {NE, "ne"}, {CS, "cs"}, {CC, "cc"}, {MI, "mi"}, {PL, "pl"}, {VS, "vs"}, {VC, "vc"},
     {HI, "hi"}, {LS, "ls"}, {GE, "ge"}, {LT, "lt"}, {GT, "gt"}, {LE, "le"}, {AL, "al"}, {NV, "nv"}};
 
 void print_instr(Instruction i) {
-    printf("%s", opcodes[i.opcode].mnemonic);
+    printf("0x%lX: %s", i.address, opcodes[i.opcode].mnemonic);
 
     for (auto& o : i.operands) {
         switch (o.type) {
@@ -28,6 +29,8 @@ void print_instr(Instruction i) {
         case Rd:
         case Rt:
         case Rt2:
+        case Rs:
+        case Rm:
             printf(" %s", register_name[static_cast<Register>(o.data)]);
             break;
         case Imm:

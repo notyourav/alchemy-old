@@ -12,5 +12,5 @@ public:
     const Program& init(std::span<uint32_t> instructions);
 
 private:
-    Program mProgram;
+    Program& mProgram;
 };

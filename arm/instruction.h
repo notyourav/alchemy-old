@@ -41,7 +41,7 @@ enum Register {
 };
 extern std::map<Register, const char*> register_name;
 
-enum OperandType { None, Imm, Rn, Rd, Rt2, Rt, cond };
+enum OperandType { None, Imm, Rn, Rd, Rt2, Rt, Rs, Rm, cond };
 enum ConditionCode {
     EQ = 0,
     NE = 1,
@@ -80,6 +80,7 @@ struct Operand {
 };
 
 struct Instruction {
+    intptr_t address;
     Opcode opcode;
     uint32_t raw;
     std::vector<Operand> operands;

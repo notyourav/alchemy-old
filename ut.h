@@ -1,11 +1,12 @@
-#ifndef ALCHEMY_UT_H
-#define ALCHEMY_UT_H
+#pragma once
 
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C"
+#define EXT extern "C"
+#else
+#define EXT
 #endif
-uint32_t extract_bits(uint32_t n, unsigned long bit, unsigned long count);
 
-#endif //ALCHEMY_UT_H
+EXT uint32_t extract_bits(uint32_t n, unsigned long bit, unsigned long count);
+EXT uint32_t swap_endian(uint32_t instr);

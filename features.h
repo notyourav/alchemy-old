@@ -19,6 +19,8 @@ struct BasicBlock {
 struct Function {
     long start_address;
     long end_address;
+    Register out_reg;
+    std::vector<Register> in_regs;
 };
 
 // Output from neural network.

@@ -5,6 +5,10 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  set(CMAKE_REQUIRED_INCLUDES "/usr/local/include /usr/include")
+endif()
+
 add_executable(alchemy main.cpp ut.c ut.h features.h)
 target_include_directories(alchemy PRIVATE ./)
 add_subdirectory(disassembler)
