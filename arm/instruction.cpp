@@ -21,7 +21,7 @@ std::map<ConditionCode, const char*> condition_code_name = {
     {HI, "hi"}, {LS, "ls"}, {GE, "ge"}, {LT, "lt"}, {GT, "gt"}, {LE, "le"}, {AL, "al"}, {NV, "nv"}};
 
 void print_instr(Instruction i) {
-    printf("0x%lX: %s", i.address, opcodes[i.opcode].mnemonic);
+    printf("%s", opcodes[i.opcode].mnemonic);
 
     for (auto& o : i.operands) {
         switch (o.type) {

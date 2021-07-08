@@ -4,8 +4,16 @@
 #include <vector>
 #include <span>
 
+class Disassembler;
+
 struct Program {
+    struct TextInfo {
+        long offset;
+        size_t size;
+    };
+
+    Program(const char* path, Disassembler* dis);
+
+    TextInfo text_info;
     std::vector<Instruction> instructions;
-    long text_offset;
-    size_t text_size;
 };

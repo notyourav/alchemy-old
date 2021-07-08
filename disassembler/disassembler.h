@@ -6,11 +6,8 @@
 
 class Disassembler {
 public:
+
     Disassembler() { generate_masks(); }
 
-    const Program& init(const char* path);
-    const Program& init(std::span<uint32_t> instructions);
-
-private:
-    Program& mProgram;
+    std::vector<Instruction> disassemble(std::span<uint32_t> data);
 };

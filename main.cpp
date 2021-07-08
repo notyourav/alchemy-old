@@ -17,7 +17,6 @@ long filesize(FILE* f) {
 int main(int argc, char* argv[]) {
     char* path = NULL;
     int opt;
-    Disassembler* dis = new Disassembler();
 
     while ((opt = getopt(argc, argv, "i:")) != -1) {
         switch (opt) {
@@ -29,26 +28,14 @@ int main(int argc, char* argv[]) {
 
     // input path was supplied
     if (path != NULL) {
-        dis->init(path);
+        Program p(path, new Disassembler());
 
-        //        FILE*   file    = NULL;
-        //        char*   content = NULL;
-        //        long    size;
-        //
-        //        file = fopen(path, "r");
-        //        if (file == NULL) {
-        //            fprintf(stderr, "Input file could not be opened.\n");
-        //            return EXIT_FAILURE;
-        //        }
-        //
-        //        size = filesize(file);
-        //        content = malloc(size);
-        //        fread(content, size, 1, file);
-        //        printf("filesize %ld kb\n", size / 1024);
-        //        fclose(file);
-        //
-        //        init_disasm(content);
-        //        free(content);
+        int addr = p.text_info.offset;
+        for (auto& i : p.instructions) {
+            printf("0x%x: ", addr);
+            print_instr(i);
+            addr += 4;
+        }
     }
 
     return 0;

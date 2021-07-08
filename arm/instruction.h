@@ -80,7 +80,6 @@ struct Operand {
 };
 
 struct Instruction {
-    intptr_t address;
     Opcode opcode;
     uint32_t raw;
     std::vector<Operand> operands;
