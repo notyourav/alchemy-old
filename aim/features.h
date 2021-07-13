@@ -2,19 +2,9 @@
 #include <vector>
 
 // Defines key context and features of the code for the neural network to use.
+namespace aim {
 
 struct Register {};
-
-struct BasicBlock {
-    enum class FlowType {
-        Fallthrough,
-        Conditional,
-        Branch,
-    };
-
-    long start_address;
-    long end_address;
-};
 
 struct Function {
     long start_address;
@@ -52,6 +42,17 @@ struct FunctionCall {
     Register out_register;
 };
 
+// Definition of fundamental types.
+struct TempFundamental {
+    bool is_single_reg;
+};
+
+// Structs. Will capture arrays as well.
+struct TempStruct : public TempFundamental {
+    bool ctor_is_inline;
+    Function* ctor;
+};
+
 struct StructAccess {
     bool is_write;
     Register reg;
@@ -66,13 +67,4 @@ struct StructAccessHeap : public StructAccess {
     long offset;
 };
 
-// Definition of fundamental types.
-struct TempFundamental {
-    bool is_single_reg;
-};
-
-// Structs. Will capture arrays as well.
-struct TempStruct : public TempFundamental {
-    bool ctor_is_inline;
-    Function* ctor;
-};
+} // namespace aim

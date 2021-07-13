@@ -89,21 +89,89 @@ static Instruction decode_instr(uint32_t instr) {
     return i;
 }
 
-// TODO: support variable length instructions.
-std::vector<Instruction> Disassembler::disassemble(std::span<uint32_t> data) {
-    std::vector<Instruction> result;
+std::vector<PInst> Disassembler::disassemble(std::span<uint32_t> data) {
+    std::vector<PInst> result;
 
     for (auto& i : data) {
-        Instruction instr = decode_instr(i);
+        Instruction inst = decode_instr(i);
+        PInst pi = {decodePInst(inst), inst};
 
-        if (instr.opcode == bad) {
+        if (inst.opcode == bad) {
             // printf("bad opcode: %08x\n", i);
             // break;
         }
 
-        result.emplace_back(instr);
+        result.emplace_back(pi);
     }
 
-    printf("Done disassemble. instr_count %ld\n", result.size());
+    printf("Disassembled %ld instructions.\n", result.size());
     return result;
+}
+
+// Return a vector -- instructions may translate to multiple psuedo-instructions
+std::vector<PInstType> Disassembler::decodePInst(Instruction i) {
+    switch (i.opcode) {
+    case orrw:
+    case orrx:
+    case movkw:
+    case movkx:
+    case movnw:
+    case movnx:
+    case movzw:
+    case movzx:
+        return {PInstType::MOVE};
+    case addw:
+    case addx:
+    case addsw:
+    case addsx:
+    case addimmw:
+    case addimmx:
+    case addsimmw:
+    case addsimmx:
+    case subimmw:
+    case subimmx:
+    case subsimmw:
+    case subsimmx:
+        return {PInstType::ADD};
+    case b:
+        return {PInstType::BRANCH};
+    case bl:
+        return {PInstType::CALL};
+    case b_cond:
+    case cbzw:
+    case cbzx:
+    case cbnzw:
+    case cbnzx:
+    case tbz:
+    case tbnz:
+        return {PInstType::BCOND};
+    case stpprew:
+    case stpprex:
+    case strimmw:
+    case strimmx:
+    case strbimm:
+    case strhimm:
+        return {PInstType::STORE};
+    case adrp:
+    case ldpoffw:
+    case ldpoffx:
+    case ldpprew:
+    case ldpprex:
+    case ldppostw:
+    case ldppostx:
+    case ldrprew:
+    case ldrprex:
+    case ldrpostw:
+    case ldrpostx:
+    case ldrimmw:
+    case ldrimmx:
+    case ldrhimm:
+    case ldrbimm:
+        return {PInstType::LOAD};
+    case ret:
+        return {PInstType::RET};
+    default:
+    case bad:
+        return {PInstType::NOP};
+    }
 }

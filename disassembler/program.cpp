@@ -42,8 +42,8 @@ Program::Program(const char* path, Disassembler* dis) {
             Elf64_Shdr* h = &shdrs[i];
             const char* name = &shstrtab[h->sh_name];
             if (strcmp(name, ".text") == 0) {
-                text_info.offset = shdrs[i].sh_offset;
-                text_info.size = shdrs[i].sh_size;
+                mTextInfo.offset = shdrs[i].sh_offset;
+                mTextInfo.size = shdrs[i].sh_size;
                 break;
             }
         }
@@ -53,29 +53,31 @@ Program::Program(const char* path, Disassembler* dis) {
         char cmd[64];
         FILE* pipe = NULL;
 
-#define DUMP_CMD "objdump -h %s"
-#define DUMP_SENTINEL "__text"
-
-        sprintf(cmd, DUMP_CMD, path);
+        sprintf(cmd, "objdump -h %s", path);
         pipe = popen(cmd, "r");
         while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-            if (strstr(buffer, DUMP_SENTINEL) != NULL) {
+            if (strstr(buffer, "__text") != NULL) {
                 char* end = NULL;
                 char size[64];
                 char vma[64];
 
                 sscanf(buffer, "%*s %*s %s %s", size, vma);
-                text_info.offset = strtol(vma, &end, 16) - 0x100000000;
-                text_info.size = strtol(size, &end, 16);
+                mTextInfo.offset = strtol(vma, &end, 16) - 0x100000000;
+                mTextInfo.size = strtol(size, &end, 16);
             }
         }
     }
-    assert(text_info.offset != 0);
-    assert(text_info.size != 0);
-    assert(text_info.size % 4 == 0);
+    assert(mTextInfo.offset != 0);
+    assert(mTextInfo.size != 0);
+    assert(mTextInfo.size % 4 == 0);
 
-    fs.seekg(text_info.offset, std::ios::beg);
-    char* buf2 = (char*)malloc(text_info.size);
-    fs.read(buf2, text_info.size);
-    instructions = dis->disassemble({(uint32_t*)buf2, text_info.size / 4});
+    fs.seekg(mTextInfo.offset, std::ios::beg);
+    char* buf2 = (char*)malloc(mTextInfo.size);
+    fs.read(buf2, mTextInfo.size);
+
+    mInstructions = dis->disassemble({(uint32_t*)buf2, mTextInfo.size / 4});
+    createFunctions();
+}
+
+void Program::createFunctions() {
 }

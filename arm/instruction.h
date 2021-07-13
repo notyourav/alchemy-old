@@ -39,9 +39,20 @@ enum Register {
     r30_lr,
     sp_zr
 };
-extern std::map<Register, const char*> register_name;
 
-enum OperandType { None, Imm, Rn, Rd, Rt2, Rt, Rs, Rm, cond };
+enum OperandType {
+    None,
+    Imm,
+    Rn,
+    Rd,
+    Rt2,
+    Rt,
+    Rs,
+    Rm,
+    cond,
+    shift,
+};
+
 enum ConditionCode {
     EQ = 0,
     NE = 1,
@@ -60,10 +71,6 @@ enum ConditionCode {
     AL = 14,
     NV = 15
 };
-
-extern std::map<Register, const char*> register_name;
-extern std::map<ConditionCode, const char*> condition_code_name;
-extern std::map<OperandType, const char*> operand_type_name;
 
 struct Operand {
     Operand(uint32_t offset, uint32_t length, uint32_t data, OperandType type) {
@@ -84,6 +91,10 @@ struct Instruction {
     uint32_t raw;
     std::vector<Operand> operands;
 };
+
+extern std::map<Register, const char*> register_name;
+extern std::map<ConditionCode, const char*> condition_code_name;
+extern std::map<OperandType, const char*> operand_type_name;
 
 extern uint32_t* op_masks;
 

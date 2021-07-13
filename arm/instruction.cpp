@@ -15,7 +15,7 @@ std::map<Register, const char*> register_name = {
     {r30_lr, "r30"}, {sp_zr, "sp"}};
 std::map<OperandType, const char*> operand_type_name = {
     {None, "None"}, {Imm, "imm"}, {Rn, "Rn"}, {Rd, "Rd"},    {Rt2, "Rt2"},
-    {Rt, "Rt"},     {Rs, "Rs"},   {Rm, "Rm"}, {cond, "cond"}};
+    {Rt, "Rt"},     {Rs, "Rs"},   {Rm, "Rm"}, {cond, "cond"}, {shift, "shift"}};
 std::map<ConditionCode, const char*> condition_code_name = {
     {EQ, "eq"}, {NE, "ne"}, {CS, "cs"}, {CC, "cc"}, {MI, "mi"}, {PL, "pl"}, {VS, "vs"}, {VC, "vc"},
     {HI, "hi"}, {LS, "ls"}, {GE, "ge"}, {LT, "lt"}, {GT, "gt"}, {LE, "le"}, {AL, "al"}, {NV, "nv"}};

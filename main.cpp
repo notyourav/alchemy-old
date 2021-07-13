@@ -14,27 +14,31 @@ long filesize(FILE* f) {
     return result;
 }
 
-int main(int argc, char* argv[]) {
-    char* path = NULL;
-    int opt;
-
-    while ((opt = getopt(argc, argv, "i:")) != -1) {
-        switch (opt) {
-        case 'i':
-            path = optarg;
-            break;
-        }
-    }
-
+void print_dis(const char* path) {
     // input path was supplied
     if (path != NULL) {
         Program p(path, new Disassembler());
 
-        int addr = p.text_info.offset;
-        for (auto& i : p.instructions) {
-            printf("0x%x: ", addr);
-            print_instr(i);
+        int addr = p.text_offset();
+        for (const auto& i : p.instructions()) {
+            printf("0x%x:\n\t", addr);
+            print_instr(i.instruction);
+            for (PInstType j : i.types)
+                printf("\t%s", inst_type_names[j]);
+            printf("\n");
             addr += 4;
+        }
+    }
+}
+
+int main(int argc, char* argv[]) {
+    int opt;
+
+    while ((opt = getopt(argc, argv, "d:")) != -1) {
+        switch (opt) {
+        case 'd':
+            print_dis(optarg);
+            break;
         }
     }
 

@@ -1,19 +1,50 @@
 #pragma once
 
-#include "arm/instruction.h"
-#include <vector>
 #include <span>
+#include <vector>
+#include "disassembler/pcode.h"
 
 class Disassembler;
 
-struct Program {
-    struct TextInfo {
+enum class FlowType {
+    Fallthrough,
+    Conditional,
+    Jump,
+};
+
+struct BasicBlock {
+    size_t size() const { return instructions.size(); }
+
+    std::span<const PInst> instructions;
+    BasicBlock* next;
+    FlowType flow_type;
+};
+
+struct Function {
+    Function* next;
+    std::span<const BasicBlock> blocks;
+};
+
+class Program {
+public:
+    struct SectionInfo {
         long offset;
         size_t size;
     };
 
     Program(const char* path, Disassembler* dis);
 
-    TextInfo text_info;
-    std::vector<Instruction> instructions;
+    long text_offset() const { return mTextInfo.offset; }
+    size_t text_size() const { return mTextInfo.size; }
+
+    std::span<const PInst> instructions() const { return mInstructions; }
+    std::span<const BasicBlock> blocks() const { return mBlocks; }
+
+private:
+    void createFunctions();
+    void createBasicBlocks();
+
+    SectionInfo mTextInfo;
+    std::vector<PInst> mInstructions;
+    std::vector<BasicBlock> mBlocks;
 };
