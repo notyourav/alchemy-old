@@ -28,7 +28,7 @@ static const char* get_shstrtab(std::fstream& f, Elf64_Ehdr* hdr, Elf64_Shdr* sh
     return strtab;
 }
 
-Program::Program(const char* path, Disassembler* dis) {
+Program::Program(const char* path, Disassembler& dis) {
     std::fstream fs(path, std::fstream::in | std::fstream::binary);
     char buf[4];
     fs.read(buf, 4);
@@ -51,13 +51,13 @@ Program::Program(const char* path, Disassembler* dis) {
         // MACH-O
         char buffer[64];
         char cmd[64];
-        FILE* pipe = NULL;
+        FILE* pipe = nullptr;
 
         sprintf(cmd, "objdump -h %s", path);
         pipe = popen(cmd, "r");
-        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-            if (strstr(buffer, "__text") != NULL) {
-                char* end = NULL;
+        while (fgets(buffer, sizeof buffer, pipe) != nullptr) {
+            if (strstr(buffer, "__text") != nullptr) {
+                char* end = nullptr;
                 char size[64];
                 char vma[64];
 
@@ -75,7 +75,7 @@ Program::Program(const char* path, Disassembler* dis) {
     char* buf2 = (char*)malloc(mTextInfo.size);
     fs.read(buf2, mTextInfo.size);
 
-    mInstructions = dis->disassemble({(uint32_t*)buf2, mTextInfo.size / 4});
+    mInstructions = dis.disassemble({(uint32_t*)buf2, mTextInfo.size / 4});
     createFunctions();
 }
 

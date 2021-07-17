@@ -32,7 +32,7 @@ public:
         size_t size;
     };
 
-    Program(const char* path, Disassembler* dis);
+    Program(const char* path, Disassembler& dis);
 
     long text_offset() const { return mTextInfo.offset; }
     size_t text_size() const { return mTextInfo.size; }

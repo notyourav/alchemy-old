@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include "disassembler/disassembler.h"
+#include "tests/tests.h"
 
 long filesize(FILE* f) {
     long pos;
@@ -16,8 +17,9 @@ long filesize(FILE* f) {
 
 void print_dis(const char* path) {
     // input path was supplied
-    if (path != NULL) {
-        Program p(path, new Disassembler());
+    if (path != nullptr) {
+        auto dis = Disassembler();
+        Program p(path, dis);
 
         int addr = p.text_offset();
         for (const auto& i : p.instructions()) {
@@ -34,10 +36,13 @@ void print_dis(const char* path) {
 int main(int argc, char* argv[]) {
     int opt;
 
-    while ((opt = getopt(argc, argv, "d:")) != -1) {
+    while ((opt = getopt(argc, argv, "d:t")) != -1) {
         switch (opt) {
         case 'd':
             print_dis(optarg);
+            break;
+        case 't':
+            test_main();
             break;
         }
     }

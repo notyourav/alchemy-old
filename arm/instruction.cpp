@@ -77,12 +77,12 @@ void generate_masks() {
         const char* split = op->encoding;
         uint32_t bit = 0;
 
-        while (split != NULL) {
+        while (split != nullptr) {
             if (split[0] == '-') {
                 mask |= (1 << (31 - bit));
             }
             split = strchr(++split, ':');
-            if (split != NULL && split[1] != ':')
+            if (split != nullptr && split[1] != ':')
                 ++split;
             bit++;
         }
